@@ -28,9 +28,43 @@ def main():
 
     if file is not None:
         stream = parse_seg_file(file)
+
+        st.sidebar.write('## Filters')
+        pfilter = st.sidebar.selectbox(
+            'Would you like to apply a filter on the P-Wave?',
+            ('No', 'lowpass', 'highpass', 'bandpass')
+        )
+        if pfilter in ['lowpass', 'highpass']:
+            freq = st.sidebar.slider('Cutoff frequency', 1, 10000, 1000)
+            stream[0].filter(pfilter, freq=freq, zerophase=True)
+            stream[1].filter(pfilter, freq=freq, zerophase=True)
+        elif pfilter == 'bandpass':
+            freqs = st.sidebar.slider('Cutoff frequency', 1, 10000, (1000, 2000))
+            stream[0].filter(pfilter, freqmin=freqs[0], freqmax=freqs[1], zerophase=True)
+            stream[1].filter(pfilter, freqmin=freqs[0], freqmax=freqs[1], zerophase=True)
+        sfilter = st.sidebar.selectbox(
+            'Would you like to apply a filter on the S-Wave?',
+            ('No', 'lowpass', 'highpass', 'bandpass')
+        )
+        if sfilter in ['lowpass', 'highpass']:
+            freq = st.sidebar.slider('Cutoff frequency', 1, 2000, 270)
+            stream[2].filter(sfilter, freq=freq, zerophase=True)
+            stream[3].filter(sfilter, freq=freq, zerophase=True)
+            stream[4].filter(sfilter, freq=freq, zerophase=True)
+            stream[5].filter(sfilter, freq=freq, zerophase=True)
+        elif sfilter == 'bandpass':
+            freqs = st.sidebar.slider('Cutoff frequency', 1, 2000, (100, 500))
+            stream[2].filter(sfilter, freqmin=freqs[0], freqmax=freqs[1], zerophase=True)
+            stream[3].filter(sfilter, freqmin=freqs[0], freqmax=freqs[1], zerophase=True)
+            stream[4].filter(sfilter, freqmin=freqs[0], freqmax=freqs[1], zerophase=True)
+            stream[5].filter(sfilter, freqmin=freqs[0], freqmax=freqs[1], zerophase=True)
+
         p_plot, s_plot = plot_traces(stream)
 
+        st.write('## P-Wave')
         st.pyplot(p_plot)
+
+        st.write('## S-Wave')
         st.pyplot(s_plot)
 
 if __name__ == '__main__':
